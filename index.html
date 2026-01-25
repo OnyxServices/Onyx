@@ -43,16 +43,35 @@
 
         /* --- Pantalla de Carga Mejorada --- */
         #loader-wrapper {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--dark-bg);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 0.8s ease-in-out;
-        }
+    position: fixed;
+    inset: 0; /* top:0 right:0 bottom:0 left:0 */
+    
+    background-image: url('https://www.veritas.org.mx/Publicacion/img/transferencias-bancarias-beneficios-de-incluir-el-concepto');
+    background-size: cover;       /* ocupa toda la pantalla */
+    background-position: center;  /* bien centrada */
+    background-repeat: no-repeat;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 10000;
+}
+
+/* capa de opacidad */
+#loader-wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9); /* 90% negro = imagen al 10% visible */
+}
+
+/* asegura que el contenido quede encima */
+#loader-wrapper > * {
+    position: relative;
+    z-index: 1;
+}
 
         .loader-card {
             background: var(--glass-bg);
@@ -71,7 +90,11 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .ad-slider { height: 50px; overflow: hidden; margin: 20px 0; }
+        .ad-slider { height: 50px; 
+            overflow: hidden; 
+            margin: 20px 0; 
+        }
+
         .ad-item { font-size: 1rem; color: var(--text-secondary); line-height: 50px; animation: slideVertical 6s infinite ease-in-out; }
 
         @keyframes slideVertical {
@@ -305,8 +328,10 @@
 </div>
 
 <header>
-    <h1>FastCuba</h1>
+    <h1>Fast 💱 Cuba</h1>
     <p>Premium Money Solutions</p>
+    <p>Envie dinero a sus familiares en Cuba</p>
+    <p>de la forma mas rapida.</p>
 </header>
 
 <!-- Botón Flotante -->
@@ -358,7 +383,7 @@
             <div class="step" id="step-2">
                 <h2 style="margin-top:0; font-weight: 700;">Datos del Destinatario</h2>
                 <div class="input-group">
-                    <label for="beneficiario_nombre">Nombre en Cuba</label>
+                    <label for="beneficiario_nombre">Nombre del </label>
                     <input type="text" id="beneficiario_nombre" required>
                 </div>
                 <div class="input-group">
