@@ -364,6 +364,182 @@
         right: 70px;
     }
 }
+
+.hero-calculator {
+    margin-top: 30px;
+    width: 100%;
+    max-width: 550px; /* Un poco más estrecho para que sea más elegante */
+    padding: 0 15px;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.calc-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    padding: 25px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+}
+
+/* Fila de Inputs */
+.calc-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.input-field {
+    flex: 1;
+    text-align: left;
+    min-width: 0; /* Evita que el input rompa el layout en móviles */
+}
+
+.input-field label {
+    font-size: 0.7rem;
+    margin-bottom: 6px;
+    color: var(--primary);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.input-field input {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 1.2rem; /* Tamaño base */
+    font-weight: 800;
+    padding: 14px 12px;
+    width: 100%;
+    border-radius: 12px;
+}
+
+/* Icono de intercambio */
+.swap-icon {
+    font-size: 1.2rem;
+    color: var(--primary);
+    background: rgba(0, 169, 255, 0.1);
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-top: 18px; /* Alineado con el input, no con el label */
+    flex-shrink: 0;
+}
+
+/* Detalles (Grilla) */
+.calc-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas en móviles por defecto */
+    gap: 12px;
+    background: rgba(0,0,0,0.15);
+    padding: 15px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-item span { 
+    color: var(--text-secondary); 
+    font-size: 0.7rem; 
+    margin-bottom: 2px;
+}
+
+.detail-item strong { 
+    color: white; 
+    font-size: 0.9rem; 
+    font-weight: 600;
+}
+
+/* El total ocupa las dos columnas para resaltar */
+.detail-item.total {
+    grid-column: span 2;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 10px;
+    margin-top: 5px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-item.total strong {
+    color: var(--success);
+    font-size: 1.1rem;
+}
+
+/* Botón Principal */
+.btn-hero-send {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0, 169, 255, 0.3);
+}
+
+.btn-hero-send:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+    box-shadow: 0 12px 25px rgba(0, 169, 255, 0.4);
+}
+
+@media (min-width: 481px) {
+    .calc-details {
+        grid-template-columns: repeat(3, 1fr); /* 3 columnas en desktop */
+    }
+    .detail-item.total {
+        grid-column: span 1;
+        border-top: none;
+        padding-top: 0;
+        margin-top: 0;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+
+/* Móviles Pequeños (iPhone SE, etc) */
+@media (max-width: 480px) {
+    .calc-input-row {
+        flex-direction: column; /* Apilar inputs */
+        gap: 0;
+    }
+    
+    .input-field { width: 100%; }
+    
+    .swap-icon {
+        transform: rotate(90deg);
+        margin: 10px auto; /* Centrar icono entre inputs */
+    }
+
+    .input-field input {
+        font-size: 1.1rem;
+        padding: 12px;
+    }
+
+    .hero-calculator {
+        margin-top: 20px;
+    }
+
+    .calc-card {
+        padding: 20px;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -384,9 +560,49 @@
 
 <header>
     <h1>Fast 💱 Cuba</h1>
-    <p>Premium Money Solutions</p>
-    <p>Envia dinero a tus familiares en Cuba de la forma mas rapida.</p>    
+    <p>Envia dinero a tus familiares en Cuba de la forma mas rapida.</p>
+
+    <!-- Insertar dentro del <header> después de los <p> -->
+<div class="hero-calculator">
+    <div class="calc-card">
+        <div class="calc-input-row">
+            <div class="input-field">
+                <label>Tú envías (USD)</label>
+                <input type="number" id="home-monto-usd" placeholder="100" min="50">
+            </div>
+            <div class="swap-icon">➔</div>
+            <div class="input-field">
+                <label>Reciben en Cuba (CUP)</label>
+                <input type="text" id="home-monto-cup" readonly placeholder="0.00">
+            </div>
+        </div>
+
+        <div class="calc-details">
+            <div class="detail-item">
+                <span>Tasa de cambio:</span>
+                <strong id="home-tasa-val">...</strong>
+            </div>
+            <div class="detail-item">
+                <span>Comisión Zelle:</span>
+                <strong id="home-comision-val">$0.00</strong>
+            </div>
+            <div class="detail-item total">
+                <span>Total a pagar:</span>
+                <strong id="home-total-pagar">$0.00</strong>
+            </div>
+        </div>
+
+        <!--<button class="btn-hero-send" onclick="iniciarConMonto()">
+            Enviar Dinero Ahora
+        </button>-->
+    </div>
+</div>
 </header>
+
+<!-- Botón Flotante de Rastreo-->
+<div class="fab" id="tracking-fab" onclick="abrirModalTracking()" title="Rastrear Envío" style="bottom: 105px; background: #6c757d; font-size: 24px;">
+    <span>🔍</span>
+</div>
 
 <!-- Botón Flotante con Burbuja -->
 <div class="fab" id="main-fab" onclick="abrirModal()" title="Nuevo Envío">
@@ -395,6 +611,28 @@
         Presiona aquí para iniciar tu transacción
     </div>
     <span>+</span>
+</div>
+
+<!-- Modal de Rastreo -->
+<div class="modal-overlay" id="modalTracking">
+    <div class="modal-content">
+        <h2 style="margin-top:0; font-weight: 700;">Rastrear mi Envío</h2>
+        <p style="font-size:0.9rem; color: var(--text-secondary);">Ingresa tu número de WhatsApp para ver el estado de tus transferencias recientes.</p>
+        
+        <div class="input-group">
+            <label>Número de WhatsApp</label>
+            <input type="text" id="search-input" placeholder="Ej: +1 123 456 7890">
+        </div>
+        
+        <button type="button" class="btn btn-next" style="width:100%;" onclick="buscarTransaccion()">Buscar Ahora</button>
+        
+        <!-- Contenedor de Resultados -->
+        <div id="tracking-results" style="margin-top: 25px; display: none;">
+            <!-- Aquí se inyectarán las tarjetas de resultados -->
+        </div>
+
+        <button type="button" class="btn btn-cancel" style="width:100%; margin-top: 15px;" onclick="cerrarModalTracking()">Cerrar</button>
+    </div>
 </div>
 
 

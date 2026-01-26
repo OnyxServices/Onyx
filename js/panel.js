@@ -6,6 +6,58 @@ function abrirModal(id) { document.getElementById(id).style.display = "block"; }
 function cerrarModal(id) { document.getElementById(id).style.display = "none"; }
 window.onclick = (e) => { if(e.target.className === 'modal') e.target.style.display = "none"; }
 
+// --- NOTIFICACIONES EN TIEMPO REAL ---
+
+function notificarNuevaTransaccion(payload) {
+    const nuevaTx = payload.new;
+    
+    // 1. Reproducir Sonido
+    const sonido = document.getElementById('notificacion-sound');
+    if (sonido) {
+        sonido.play().catch(error => {
+            console.log("El navegador bloqueó el sonido hasta que el usuario interactúe con la página.");
+        });
+    }
+
+    // 2. Notificación Visual (Se verá encima de cualquier modal)
+    Swal.fire({
+        title: '¡Nueva Transacción!',
+        text: `De: ${nuevaTx.remitente_nombre} por $${nuevaTx.monto_usd} USD`,
+        icon: 'info',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: true,
+        confirmButtonText: 'Ver ahora',
+        timer: 10000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            abrirModal('modal-transacciones');
+            cargarTransacciones(); // Refrescar la tabla
+        }
+    });
+
+    // 3. Refrescar datos del panel automáticamente
+    cargarTransacciones();
+    cargarMetricas();
+}
+
+// Inicializar la escucha de Supabase
+const suscripcionTransacciones = supabaseClient
+    .channel('cambios-transacciones')
+    .on(
+        'postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'transacciones' }, 
+        (payload) => {
+            notificarNuevaTransaccion(payload);
+        }
+    )
+    .subscribe();
+    
 // --- LÓGICA DE CONFIGURACIÓN (TASA) ---
 async function cargarTasa() {
     // Usamos .limit(1) sin .single() para evitar errores si la tabla está vacía
@@ -166,6 +218,110 @@ async function cargarMetricas() {
     document.getElementById('m-usd-recibido').innerText = `$${totalUsd.toFixed(2)}`;
     document.getElementById('m-comisiones').innerText = `$${totalComis.toFixed(2)}`;
     document.getElementById('m-cup-entregado').innerText = totalCup.toLocaleString('es-CU') + " CUP";
+}
+
+// --- LÓGICA DE CONCILIACIÓN ---
+async function cargarConciliacion() {
+    // 1. Calcular el total confirmado de HOY para el input
+    const hoy = new Date();
+    hoy.setHours(0,0,0,0);
+    const { data: txsHoy } = await supabaseClient.from('transacciones')
+        .select('total_usd')
+        .eq('estado', 'confirmado')
+        .gte('fecha_creacion', hoy.toISOString());
+    
+    const totalSistema = txsHoy.reduce((acc, curr) => acc + (parseFloat(curr.total_usd) || 0), 0);
+    document.getElementById('conc-confirmado').value = totalSistema.toFixed(2);
+
+    // 2. Cargar historial de conciliaciones
+    const { data: registros } = await supabaseClient.from('conciliacion_diaria')
+        .select('*').order('fecha', { ascending: false });
+
+    const tbody = document.getElementById("cuerpo-conciliacion");
+    tbody.innerHTML = registros.map(r => `
+        <tr>
+            <td>${r.fecha}</td>
+            <td>$${r.total_confirmado}</td>
+            <td>$${r.total_banco}</td>
+            <td style="color: ${r.diferencia < 0 ? 'red' : 'green'}; font-weight: bold;">$${r.diferencia}</td>
+            <td><small>${r.observaciones || '-'}</small></td>
+        </tr>
+    `).join('');
+}
+
+async function guardarConciliacion() {
+    const total_confirmado = parseFloat(document.getElementById('conc-confirmado').value);
+    const total_banco = parseFloat(document.getElementById('conc-banco').value);
+    const observaciones = document.getElementById('conc-obs').value;
+    const fecha = new Date().toISOString().split('T')[0];
+
+    const { error } = await supabaseClient.from('conciliacion_diaria').upsert({
+        fecha, total_confirmado, total_banco, 
+        diferencia: (total_banco - total_confirmado), 
+        observaciones
+    });
+
+    if (error) Toast.fire({ icon: 'error', title: 'Error al conciliar' });
+    else {
+        Toast.fire({ icon: 'success', title: 'Cierre de día guardado' });
+        cargarConciliacion();
+    }
+}
+
+// --- LÓGICA DE LOGS (Auditoría) ---
+async function cargarLogs() {
+    const { data: logs } = await supabaseClient.from('logs_operacion')
+        .select('*').order('fecha', { ascending: false }).limit(50);
+
+    const tbody = document.getElementById("cuerpo-logs");
+    tbody.innerHTML = logs.map(l => `
+        <tr>
+            <td>${new Date(l.fecha).toLocaleString()}</td>
+            <td>#${l.transaccion_id}</td>
+            <td><b>${l.accion}</b></td>
+            <td>${l.usuario_admin || 'Admin'}</td>
+            <td>${l.comentario || ''}</td>
+        </tr>
+    `).join('');
+}
+
+// --- EXPORTACIÓN ---
+async function exportarCSV() {
+    const { data } = await supabaseClient.from('transacciones')
+        .select('fecha_creacion, remitente_nombre, beneficiario_nombre, monto_usd, estado')
+        .eq('estado', 'confirmado');
+    
+    let csvContent = "data:text/csv;charset=utf-8,Fecha,Remitente,Beneficiario,Monto USD,Estado\n";
+    data.forEach(r => {
+        csvContent += `${r.fecha_creacion},${r.remitente_nombre},${r.beneficiario_nombre},${r.monto_usd},${r.estado}\n`;
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `reporte_fastcuba_${new Date().toLocaleDateString()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+}
+
+// --- MODIFICAR LA FUNCIÓN CAMBIAR ESTADO EXISTENTE ---
+// Actualiza tu función cambiarEstado para que inserte un log automáticamente
+async function cambiarEstado(id, nuevoEstado) {
+    const { error } = await supabaseClient.from('transacciones').update({estado: nuevoEstado}).eq('id', id);
+    
+    if(!error) {
+        // INSERTAR LOG DE OPERACIÓN
+        await supabaseClient.from('logs_operacion').insert([{
+            transaccion_id: id,
+            accion: `Cambio de estado a ${nuevoEstado}`,
+            usuario_admin: 'Admin Principal',
+            comentario: `Transacción marcada como ${nuevoEstado}`
+        }]);
+
+        Toast.fire({ icon: 'success', title: `Transacción ${nuevoEstado}` });
+        cargarTransacciones();
+        cargarMetricas();
+    }
 }
 
 // --- TEMPORIZADOR ---

@@ -11,14 +11,15 @@
 
     <style>
         :root {
-            --primary: #ff3b3f;
-            --primary-dark: #d32f2f;
-            --bg: #f8fafc;
+            /* CAMBIO DE COLORES A TONOS OSCUROS */
+            --primary: #1e293b;        /* Slate oscuro (antes rojo) */
+            --primary-dark: #0f172a;   /* Azul casi negro */
+            --bg: #f1f5f9;
             --surface: #ffffff;
             --text-main: #1e293b;
             --text-muted: #64748b;
             --border: #e2e8f0;
-            --success: #22c55e;
+            --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -33,13 +34,13 @@
         }
 
         header { 
-            background: var(--surface); 
-            color: var(--primary); 
+            background: var(--primary); /* Fondo oscuro para el header */
+            color: white;               /* Texto blanco para contraste */
             padding: 1.5rem; 
             text-align: center; 
             font-size: 1.5rem; 
             font-weight: 800; 
-            border-bottom: 2px solid var(--primary);
+            border-bottom: 4px solid var(--primary-dark);
             box-shadow: var(--shadow);
         }
 
@@ -177,12 +178,13 @@
 
         /* Botones de Acción */
         .btn-view { 
-            background: #e0f2fe; color: #0369a1; 
+            background: #f1f5f9; color: var(--primary); 
             text-decoration: none; padding: 6px 12px; 
             border-radius: 6px; font-weight: 600; font-size: 0.85rem;
             transition: 0.2s;
+            border: 1px solid var(--border);
         }
-        .btn-view:hover { background: #bae6fd; }
+        .btn-view:hover { background: var(--primary); color: white; }
         
         .confirm, .reject { 
             border: none; padding: 8px; border-radius: 6px; 
@@ -209,6 +211,19 @@
         .metric-card p { margin: 12px 0 0; font-size: 1.6rem; font-weight: 800; color: var(--text-main); }
         .metric-highlight p { color: var(--primary); }
 
+        /* Ajuste de Timer y Highlight para combinar con el azul */
+        #update-timer {
+            background: #f1f5f9; 
+            color: var(--primary); 
+            padding: 5px 12px; 
+            border-radius: 20px; 
+            font-size: 0.85rem; 
+            font-weight: 600;
+            border: 1px solid var(--border);
+        }
+
+        .metric-highlight { background: #f8fafc !important; border-color: var(--primary) !important; }
+
         /* Comisiones inputs */
         #tabla-comisiones input {
             padding: 8px;
@@ -219,6 +234,12 @@
     </style>
 </head>
 <body>
+
+    <!-- Elemento de audio oculto -->
+<audio id="notificacion-sound" preload="auto">
+    <!-- URL DEL SONIDO: Puedes cambiar el src por cualquier link de audio mp3/wav -->
+    <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+</audio>
 
 <header>FASTCUBA ADMIN</header>
 
@@ -246,6 +267,18 @@
             <h3>⚙️ Configuración</h3>
             <p>Ajustar tramos de comisión y tarifas</p>
         </div>
+        <div class="card" onclick="abrirModal('modal-conciliacion')">
+    <h3>⚖️ Conciliación</h3>
+    <p>Cerrar caja diaria y verificar saldos bancarios</p>
+</div>
+<div class="card" onclick="abrirModal('modal-logs')">
+    <h3>📜 Historial de Logs</h3>
+    <p>Rastreo de acciones y cambios realizados</p>
+</div>
+<div class="card" onclick="exportarCSV()">
+    <h3>📥 Reporte Excel</h3>
+    <p>Descargar transacciones confirmadas (CSV)</p>
+</div>
     </div>
 </main>
 
@@ -327,6 +360,67 @@
         <button class="btn-primary" onclick="agregarFilaComision()" style="width:100%; background: #0f172a;">
             + Agregar Nuevo Tramo de Comisión
         </button>
+    </div>
+</div>
+
+<!-- MODAL CONCILIACIÓN -->
+<div id="modal-conciliacion" class="modal">
+    <div class="modal-content" style="max-width: 900px;">
+        <span class="close" onclick="cerrarModal('modal-conciliacion')">&times;</span>
+        <h2 style="margin-top:0">Conciliación Diaria</h2>
+        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end;">
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Total Confirmado (Sistema)</label>
+                    <input type="number" id="conc-confirmado" readonly style="width:100%; background: #eee; padding: 8px; border: 1px solid var(--border); border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Total Real en Banco (USD)</label>
+                    <input type="number" id="conc-banco" step="0.01" style="width:100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Observaciones</label>
+                    <input type="text" id="conc-obs" placeholder="Ej: Faltó un depósito" style="width:100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;">
+                </div>
+                <button class="btn-primary" onclick="guardarConciliacion()">Cerrar Día</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table id="tabla-conciliacion">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Sistema (USD)</th>
+                        <th>Banco (USD)</th>
+                        <th>Diferencia</th>
+                        <th>Obs.</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-conciliacion"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL LOGS -->
+<div id="modal-logs" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModal('modal-logs')">&times;</span>
+        <h2 style="margin-top:0">Auditoría de Operaciones</h2>
+        <div class="table-container">
+            <table id="tabla-logs">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>ID Transacción</th>
+                        <th>Acción</th>
+                        <th>Admin</th>
+                        <th>Comentario</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-logs"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
