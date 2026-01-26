@@ -605,6 +605,49 @@
     border-radius: 3px;
     overflow: hidden;
 }
+
+/* --- Estilos para los Resultados de Búsqueda --- */
+.tracking-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 12px;
+    transition: transform 0.2s;
+}
+
+.tracking-card:hover {
+    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.status-pill {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Colores de estados */
+.status-pendiente { background: #ffc107; color: #000; }
+.status-completada { background: #28a745; color: #fff; }
+.status-cancelada { background: #dc3545; color: #fff; }
+.status-procesando { background: var(--primary); color: #fff; }
+
+.tracking-info {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+/* Fix para la visibilidad del modal */
+.modal-overlay.active {
+    display: flex !important;
+    opacity: 1;
+}
     </style>
 </head>
 <body>
