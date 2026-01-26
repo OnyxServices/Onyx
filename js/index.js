@@ -188,19 +188,61 @@ function cerrarModal() {
 
 function nextStep(step) {
     const activeStepDiv = document.querySelector('.step.active');
-    if(activeStepDiv && parseInt(activeStepDiv.id.split('-')[1]) < step) {
+    
+    // Obtener el número del paso actual desde el ID (ej: "step-1" -> 1)
+    const currentStepNum = parseInt(activeStepDiv.id.split('-')[1]);
+
+    // SOLO validamos si el usuario intenta ir hacia ADELANTE
+    if (step > currentStepNum) {
         const inputs = activeStepDiv.querySelectorAll('input[required]');
-        for(let input of inputs){
-            if(!input.value.trim()){
-                Swal.fire({ icon: 'warning', title: 'Falta información', text: 'Por favor rellena los campos marcados.', background: '#24243e', color: '#fff' });
+        let hayCamposVacios = false;
+
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                hayCamposVacios = true;
+                input.style.borderColor = 'var(--error)'; // Feedback visual en rojo
+            } else {
+                input.style.borderColor = 'var(--glass-border)'; // Restaurar color
+            }
+        });
+
+        if (hayCamposVacios) {
+            Swal.fire({ 
+                icon: 'warning', 
+                title: 'Falta información', 
+                text: 'Por favor rellena todos los campos obligatorios para continuar.', 
+                background: '#1e2332', 
+                color: '#fff',
+                confirmButtonColor: 'var(--primary)'
+            });
+            return; // Detiene la ejecución, no cambia de paso
+        }
+
+        // Validación extra para el monto mínimo en el Paso 1
+        if (currentStepNum === 1) {
+            const monto = parseFloat(document.getElementById('monto_usd').value);
+            if (monto < 50) {
+                Swal.fire({ 
+                    icon: 'warning', 
+                    title: 'Monto insuficiente', 
+                    text: 'El envío mínimo permitido es de $50 USD.', 
+                    background: '#1e2332', 
+                    color: '#fff' 
+                });
+                document.getElementById('monto_usd').style.borderColor = 'var(--error)';
                 return;
             }
         }
     }
 
+    // Si pasó las validaciones o va hacia atrás, cambiamos de paso
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     const nextDiv = document.getElementById(`step-${step}`);
-    if(nextDiv) nextDiv.classList.add('active');
+    if (nextDiv) {
+        nextDiv.classList.add('active');
+        // Opcional: Scrollear al inicio del modal por si el contenido es largo
+        document.querySelector('.modal-content').scrollTop = 0;
+    }
 }
 
 function iniciarConMonto() {
