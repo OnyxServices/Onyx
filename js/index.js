@@ -351,6 +351,107 @@ async function buscarTransaccion() {
     }
 }
 
+async function procesarEnvioFinal() {
+    const btn = document.getElementById('btn-enviar');
+    const fileInput = document.getElementById('comprobante');
+
+    // 1. Validar archivo
+    if (!fileInput.files || fileInput.files.length === 0) {
+        Swal.fire({ icon: 'error', title: 'Falta el comprobante', text: 'Debes subir la foto de la transferencia.', background: '#1e2332', color: '#fff' });
+        return;
+    }
+
+    // 2. Bloquear botón
+    btn.disabled = true;
+    btn.innerText = "Subiendo datos...";
+
+    try {
+        const file = fileInput.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `comprobantes/${fileName}`;
+
+        // 3. Subir Imagen a Supabase Storage
+        // IMPORTANTE: Debes tener un bucket llamado 'comprobantes' configurado como PUBLIC
+        const { error: uploadError } = await supabaseClient.storage
+            .from('comprobantes')
+            .upload(filePath, file);
+
+        if (uploadError) {
+            throw new Error("Error al subir imagen: " + uploadError.message);
+        }
+
+        // 4. Obtener URL de la imagen
+        const { data: urlData } = supabaseClient.storage
+            .from('comprobantes')
+            .getPublicUrl(filePath);
+        const montoUsd = parseFloat(document.getElementById('monto_usd').value);
+        const comisionUsd = obtenerComision(montoUsd);    
+
+        // 5. Preparar datos (usando los IDs exactos de tu HTML)
+       const nuevaTransaccion = {
+            monto_usd: montoUsd,
+            comision_usd: comisionUsd,
+            // total_usd: montoUsd + comisionUsd,  <-- ELIMINA O COMENTA ESTA LÍNEA
+    
+            remitente_nombre: document.getElementById('remitente_nombre').value,
+            remitente_whatsapp: document.getElementById('remitente_whatsapp').value,
+            beneficiario_nombre: document.getElementById('beneficiario_nombre').value,
+            beneficiario_provincia: document.getElementById('beneficiario_provincia').value,
+            beneficiario_whatsapp: document.getElementById('beneficiario_whatsapp').value || null,
+
+    comprobante_url: urlData.publicUrl,
+    tasa_cambio: tasaCambio,
+    estado: 'pendiente'
+};
+
+       // 6. Insertar en la tabla 'transacciones'
+        const { error: insertError } = await supabaseClient
+            .from('transacciones')
+            .insert([nuevaTransaccion]);
+
+        if (insertError) {
+            throw new Error("Error al guardar datos: " + insertError.message);
+        }
+
+        // 7. Éxito total
+        // 7. Éxito total
+        await Swal.fire({
+            icon: 'success',
+            title: '¡Envío Exitoso!',
+            text: 'Tu transferencia está en revisión. Te avisaremos por WhatsApp.',
+            background: '#1e2332',
+            color: '#fff'
+        });
+
+        // Cierra el modal de la transacción
+        cerrarModal(); 
+
+        // Limpia los inputs manualmente para evitar errores de ID de formulario
+        document.querySelectorAll('#modal-envio input').forEach(input => input.value = '');
+        
+        // Regresa el flujo del modal al paso 1 para el próximo envío
+        if (typeof nextStep === "function") nextStep(1);
+
+    } catch (error) {
+        console.error("Error crítico:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Hubo un problema',
+            text: error.message,
+            background: '#1e2332',
+            color: '#fff'
+        });
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Finalizar Envío";
+    }
+}
+
+// Asegúrate de exponer la función al objeto window
+window.procesarEnvioFinal = procesarEnvioFinal;
+
+
 // --- EXPONER FUNCIONES GLOBALES ---
 window.copiarZelle = copiarZelle;
 window.abrirModal = abrirModal;
