@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FastCuba - Premium Money Transfer</title>
-    
+    <link rel="icon" href="data:,">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -845,18 +845,21 @@
             </div>
 
             <!-- PASO 3: Comprobante -->
-            <div class="step" id="step-3">
-                <h2 style="margin-top:0; font-weight: 700;">Comprobante de Pago</h2>
-                <p style="font-size:0.9rem; opacity:0.8; line-height: 1.5;">Sube una captura de pantalla de tu transferencia Zelle.</p>
-                <div class="input-group" style="margin-top: 25px;">
-                    <label for="comprobante">Archivo de Imagen</label>
-                    <input type="file" id="comprobante" accept="image/*" required>
-                </div>
-                <div class="nav-buttons" style="display:flex; gap:10px; margin-top: 30px;">
-                    <button type="button" class="btn btn-prev" onclick="nextStep(2)">Atrás</button>
-                    <button type="submit" id="btn-enviar" class="btn btn-next">Finalizar Envío</button>
-                </div>
-            </div>
+          <!-- Busca el Paso 3 en tu index.html y cambia el botón -->
+<div class="step" id="step-3">
+    <h2 style="margin-top:0; font-weight: 700;">Comprobante de Pago</h2>
+    <p style="font-size:0.9rem; opacity:0.8; line-height: 1.5;">Sube una captura de pantalla de tu transferencia Zelle.</p>
+    <div class="input-group" style="margin-top: 25px;">
+        <label for="comprobante">Archivo de Imagen</label>
+        <input type="file" id="comprobante" accept="image/*" required>
+    </div>
+    <div class="nav-buttons" style="display:flex; gap:10px; margin-top: 30px;">
+        <button type="button" class="btn btn-prev" onclick="nextStep(2)">Atrás</button>
+        
+        <!-- CAMBIA ESTA LÍNEA: de type="submit" a type="button" y agrega el onclick -->
+        <button type="button" id="btn-enviar" class="btn btn-next" onclick="procesarEnvioFinal()">Finalizar Envío</button>
+    </div>
+</div>
         </form>
     </div>
 </div>
