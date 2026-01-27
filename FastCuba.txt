@@ -21,6 +21,7 @@ CREATE TABLE public.config (
   id integer NOT NULL DEFAULT nextval('config_id_seq'::regclass),
   tasa_cambio numeric DEFAULT 0,
   fecha_actualizacion timestamp without time zone DEFAULT now(),
+  zelle_cuenta text DEFAULT 'pago@fastcuba.com'::text,
   CONSTRAINT config_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.logs_operacion (

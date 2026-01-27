@@ -1,0 +1,322 @@
+/* =====================================================
+   VARIABLES BASE (MODO CLARO)
+   ===================================================== */
+:root {
+    /* Brand */
+    --primary: #1e293b;
+    --primary-dark: #0f172a;
+
+    /* Backgrounds */
+    --bg: #f1f5f9;
+    --surface: #ffffff;
+    --surface-muted: #f8fafc;
+
+    /* Text */
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --text-fixed: #000000; /* texto que NUNCA cambia */
+
+    /* Borders & effects */
+    --border: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+    /* States */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+}
+
+/* =====================================================
+   MODO OSCURO (solo override de variables)
+   ===================================================== */
+body.dark {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-muted: #020617;
+
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+
+    --border: #334155;
+    --shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+
+/* =====================================================
+   BASE
+   ===================================================== */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+}
+
+header {
+    background: var(--primary);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    border-bottom: 4px solid var(--primary-dark);
+}
+
+main {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* =====================================================
+   LAYOUT / CARDS
+   ===================================================== */
+.config-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.rate-card {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.rate-card h3 {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.rate-card input {
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-weight: bold;
+    background: var(--bg);
+    color: var(--text-main);
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    transition: 0.3s;
+    position: relative;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary);
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary);
+}
+
+/* =====================================================
+   MODALES
+   ===================================================== */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.modal-content {
+    background: var(--surface);
+    margin: 2% auto;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 90%;
+    max-width: 1100px;
+    animation: modalIn 0.3s;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+/* =====================================================
+   TABLAS (SIEMPRE LEGIBLES)
+   ===================================================== */
+.table-container {
+    overflow-x: auto;
+    margin-top: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+/* Fondo SIEMPRE blanco */
+#tabla-transacciones table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+}
+
+/* Texto SIEMPRE negro */
+#tabla-transacciones th,
+#tabla-transacciones td {
+    color: var(--text-fixed);
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+#tabla-transacciones th {
+    background: #f8fafc;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+/* Filas especiales */
+.fila-pendiente {
+    background-color: rgb(255, 92, 69);
+    border-left: 4px solid var(--warning);
+}
+
+/* =====================================================
+   BADGES / BOTONES
+   ===================================================== */
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.badge-pendiente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-confirmado {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#tabla-transacciones button:hover {
+    background: var(--primary) !important;
+    color: white !important;
+}
+
+/* =====================================================
+   FILTROS Y PAGINACIÓN
+   ===================================================== */
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    background: var(--surface);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-bar input,
+.filter-bar select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-main);
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.pagination-container button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.pagination-container button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* =====================================================
+   IMÁGENES
+   ===================================================== */
+.img-recibo-modal {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.swal2-container {
+    z-index: 99999 !important;
+}
+
+/* Opcional: Estilo extra para que resalte más en el modo oscuro */
+body.dark .swal2-popup.swal2-toast {
+    background: #1e293b !important;
+    color: #ffffff !important;
+    border: 1px solid #334155;
+}

@@ -8,419 +8,173 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="./js/supabase.js"></script>
-
-    <style>
-        :root {
-            /* CAMBIO DE COLORES A TONOS OSCUROS */
-            --primary: #1e293b;        /* Slate oscuro (antes rojo) */
-            --primary-dark: #0f172a;   /* Azul casi negro */
-            --bg: #f1f5f9;
-            --surface: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
-
-        body { 
-            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-            margin: 0; 
-            background: var(--bg); 
-            color: var(--text-main);
-            line-height: 1.5;
-        }
-
-        header { 
-            background: var(--primary); /* Fondo oscuro para el header */
-            color: white;               /* Texto blanco para contraste */
-            padding: 1.5rem; 
-            text-align: center; 
-            font-size: 1.5rem; 
-            font-weight: 800; 
-            border-bottom: 4px solid var(--primary-dark);
-            box-shadow: var(--shadow);
-        }
-
-        main { padding: 2rem; max-width: 1200px; margin: auto; }
-        
-        /* Tasa de Cambio Card */
-        .rate-card {
-            background: var(--surface);
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: var(--shadow);
-            max-width: 500px;
-            margin: 0 auto 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            border: 1px solid var(--border);
-        }
-        .rate-card h3 { margin: 0; font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .rate-card input {
-            padding: 10px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            width: 100px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .rate-card input:focus { border-color: var(--primary); }
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
-
-        /* Dashboard Grid */
-        .dashboard { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 25px; 
-        }
-        .card { 
-            background: var(--surface); 
-            padding: 2rem; 
-            border-radius: 1rem; 
-            box-shadow: var(--shadow); 
-            cursor: pointer; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            border: 1px solid var(--border);
-            text-align: left;
-            position: relative;
-            overflow: hidden;
-        }
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 4px; height: 100%;
-            background: var(--primary);
-        }
-        .card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            border-color: var(--primary);
-        }
-        .card h3 { margin: 0 0 8px; font-size: 1.25rem; }
-        .card p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
-
-        /* Modales */
-        .modal { 
-            display: none; 
-            position: fixed; 
-            z-index: 1000; 
-            left: 0; top: 0; width: 100%; height: 100%; 
-            background: rgba(15, 23, 42, 0.75); 
-            backdrop-filter: blur(4px);
-            overflow-y: auto; 
-        }
-        .modal-content { 
-            background: var(--surface); 
-            margin: 3% auto; 
-            padding: 2.5rem; 
-            border-radius: 1.5rem; 
-            width: 90%; 
-            max-width: 1100px; 
-            position: relative; 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-            animation: modalIn 0.3s ease-out;
-        }
-        @keyframes modalIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .close { position: absolute; right: 25px; top: 20px; font-size: 24px; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
-        .close:hover { color: var(--danger); }
-
-        /* Tablas Modernas */
-        .table-container { overflow-x: auto; margin-top: 20px; border-radius: 8px; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; background: var(--surface); }
-        th { 
-            background: #f8fafc; 
-            padding: 14px; 
-            text-align: left; 
-            font-size: 0.8rem; 
-            text-transform: uppercase; 
-            letter-spacing: 0.05em; 
-            color: var(--text-muted);
-            border-bottom: 2px solid var(--border);
-        }
-        td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 0.95rem; vertical-align: middle; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover { background-color: #fcfcfc; }
-        
-        .fila-pendiente { background-color: #fff9f0 !important; }
-        .fila-pendiente td { border-left: 4px solid var(--warning); }
-        
-        /* Badges */
-        .badge { 
-            padding: 6px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 700; 
-            display: inline-block;
-        }
-        .badge-pendiente { background: #fef3c7; color: #92400e; }
-        .badge-confirmado { background: #dcfce7; color: #166534; }
-        .badge-rechazado { background: #fee2e2; color: #991b1b; }
-
-        /* Botones de Acción */
-        .btn-view { 
-            background: #f1f5f9; color: var(--primary); 
-            text-decoration: none; padding: 6px 12px; 
-            border-radius: 6px; font-weight: 600; font-size: 0.85rem;
-            transition: 0.2s;
-            border: 1px solid var(--border);
-        }
-        .btn-view:hover { background: var(--primary); color: white; }
-        
-        .confirm, .reject { 
-            border: none; padding: 8px; border-radius: 6px; 
-            cursor: pointer; transition: 0.2s; font-size: 1.1rem;
-            margin: 0 2px;
-        }
-        .confirm { background: #dcfce7; color: #166534; }
-        .confirm:hover { background: #22c55e; color: white; }
-        .reject { background: #fee2e2; color: #991b1b; }
-        .reject:hover { background: #ef4444; color: white; }
-
-        /* Métricas */
-        .metrics-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-            gap: 20px; margin-top: 25px; 
-        }
-        .metric-card { 
-            background: #f8fafc; padding: 1.5rem; 
-            border-radius: 12px; border: 1px solid var(--border); 
-            text-align: center; 
-        }
-        .metric-card h4 { margin: 0; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; }
-        .metric-card p { margin: 12px 0 0; font-size: 1.6rem; font-weight: 800; color: var(--text-main); }
-        .metric-highlight p { color: var(--primary); }
-
-        /* Ajuste de Timer y Highlight para combinar con el azul */
-        #update-timer {
-            background: #f1f5f9; 
-            color: var(--primary); 
-            padding: 5px 12px; 
-            border-radius: 20px; 
-            font-size: 0.85rem; 
-            font-weight: 600;
-            border: 1px solid var(--border);
-        }
-
-        .metric-highlight { background: #f8fafc !important; border-color: var(--primary) !important; }
-
-        /* Comisiones inputs */
-        #tabla-comisiones input {
-            padding: 8px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="./css/panel.css">
 </head>
 <body>
 
-    <!-- Elemento de audio oculto -->
-<audio id="notificacion-sound" preload="auto">
-    <!-- URL DEL SONIDO: Puedes cambiar el src por cualquier link de audio mp3/wav -->
-    <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
-</audio>
-
-<header>FASTCUBA ADMIN</header>
+<header>
+    FASTCUBA ADMIN
+    <button onclick="toggleDarkMode()" id="dark-mode-btn" style="position: absolute; right: 20px; top: 20px; cursor: pointer; background: none; border: 1px solid white; color: white; border-radius: 5px; padding: 5px;">🌙</button>
+</header>
 
 <main>
-    <!-- Tasa de Cambio Rápida -->
-    <section class="rate-card">
-        <h3>Tasa del día</h3>
-        <div>
-            <input type="number" id="tasa_cambio" step="0.1"> 
-            <span style="font-weight:bold; color:var(--text-muted)">CUP</span>
+    <!-- Configuración Rápida -->
+    <div class="config-container">
+        <div class="rate-card">
+            <div>
+                <h3>Tasa CUP</h3>
+                <input type="number" id="tasa_cambio" step="0.1" style="width: 80px;">
+            </div>
+            <div style="border-left: 1px solid var(--border); padding-left: 15px;">
+                <h3>Cuenta Zelle</h3>
+                <input type="text" id="zelle_cuenta" placeholder="correo@zelle.com">
+            </div>
+            <button class="btn-primary" onclick="actualizarConfig()">Actualizar</button>
         </div>
-        <button class="btn-primary" onclick="actualizarTasa()">Actualizar</button>
-    </section>
+        <div id="update-timer">Actualizando en: 15s</div>
+    </div>
 
+    <!-- Dashboard -->
     <div class="dashboard">
         <div class="card" onclick="abrirModal('modal-transacciones')">
             <h3>💸 Transacciones</h3>
-            <p>Aprobar envíos y ver detalles de beneficiarios</p>
+            <p>Gestionar envíos y beneficiarios</p>
         </div>
         <div class="card" onclick="abrirModal('modal-metricas')">
             <h3>📊 Resumen Diario</h3>
-            <p>Visualizar ganancias y totales procesados hoy</p>
+            <p>Ganancias y totales de hoy</p>
         </div>
         <div class="card" onclick="abrirModal('modal-comisiones')">
             <h3>⚙️ Configuración</h3>
-            <p>Ajustar tramos de comisión y tarifas</p>
+            <p>Tramos de comisión</p>
         </div>
         <div class="card" onclick="abrirModal('modal-conciliacion')">
-    <h3>⚖️ Conciliación</h3>
-    <p>Cerrar caja diaria y verificar saldos bancarios</p>
-</div>
-<div class="card" onclick="abrirModal('modal-logs')">
-    <h3>📜 Historial de Logs</h3>
-    <p>Rastreo de acciones y cambios realizados</p>
-</div>
-<div class="card" onclick="exportarCSV()">
-    <h3>📥 Reporte Excel</h3>
-    <p>Descargar transacciones confirmadas (CSV)</p>
-</div>
+            <h3>⚖️ Conciliación</h3>
+            <p>Cierre de caja y bancos</p>
+        </div>
+        <div class="card" onclick="abrirModal('modal-logs')">
+            <h3>📜 Auditoría</h3>
+            <p>Historial de acciones</p>
+        </div>
+        <div class="card" onclick="exportarCSV()">
+            <h3>📥 Reporte CSV</h3>
+            <p>Descargar base de datos</p>
+        </div>
     </div>
 </main>
 
-<!-- MODAL TRANSACCIONES -->
+<!--  modal-transacciones -->
 <div id="modal-transacciones" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="cerrarModal('modal-transacciones')">&times;</span>
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;">
-            <h2 style="margin:0">Gestión de Transacciones</h2>
-            <div id="update-timer" style="background: #fff1f2; color: #e11d48; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                Actualizando en: 15s
-            </div>
-        </div>
-        <div class="table-container">
-            <table id="tabla-transacciones">
-                <thead>
-                    <tr>
-                        <th>Remitente</th>
-                        <th>Beneficiario</th>
-                        <th>WhatsApp</th>
-                        <th>Monto (USD)</th>
-                        <th>Recibe (CUP)</th>
-                        <th>Recibo</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+    <!-- Dentro de modal-transacciones -->
+<div class="modal-content">
+    <span class="close" onclick="cerrarModal('modal-transacciones')">&times;</span>
+    
+    <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+        <h2>Gestión de Transacciones</h2>
+        <button class="btn-danger" onclick="borrarTodasTransacciones()">🗑️ Limpiar</button>
+    </div>
+
+    <!-- BARRA DE FILTROS -->
+    <div class="filter-bar">
+        <input type="text" id="f-search" placeholder="🔍 Buscar nombre..." oninput="resetYPaginación()">
+        <select id="f-estado" onchange="resetYPaginación()">
+            <option value="todos">Todos los estados</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="confirmado">Confirmados</option>
+            <option value="rechazado">Rechazados</option>
+        </select>
+        <div style="display:flex; align-items:center; gap:5px;">
+            <input type="date" id="f-inicio" onchange="resetYPaginación()">
+            <span>a</span>
+            <input type="date" id="f-fin" onchange="resetYPaginación()">
         </div>
     </div>
+
+    <div class="table-container">
+        <table id="tabla-transacciones">
+            <thead>
+                <tr>
+                    <th>Remitente</th>
+                    <th>Beneficiario</th>
+                    <th>WhatsApp</th>
+                    <th>USD</th>
+                    <th>CUP</th>
+                    <th>Recibo</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- CONTROLES DE PAGINACIÓN -->
+    <div class="pagination-container">
+        <button onclick="cambiarPagina(-1)" id="btn-prev">Anterior</button>
+        <span id="page-info">Página 1</span>
+        <button onclick="cambiarPagina(1)" id="btn-next">Siguiente</button>
+    </div>
+</div>
 </div>
 
-<!-- MODAL MÉTRICAS -->
+<!-- Modal Métricas -->
 <div id="modal-metricas" class="modal">
     <div class="modal-content" style="max-width: 800px;">
         <span class="close" onclick="cerrarModal('modal-metricas')">&times;</span>
-        <h2 style="margin-top:0">Resumen de Operaciones (Hoy)</h2>
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <h4>Transacciones</h4>
-                <p id="m-cantidad">0</p>
-            </div>
-            <div class="metric-card">
-                <h4>USD Recibido</h4>
-                <p id="m-usd-recibido">$0.00</p>
-            </div>
-            <div class="metric-card">
-                <h4>Ganancia Estimada</h4>
-                <p id="m-comisiones" style="color: var(--success);">$0.00</p>
-            </div>
-            <div class="metric-card metric-highlight" style="background: #fff1f2; border-color: #fecdd3;">
-                <h4>CUP a Entregar</h4>
-                <p id="m-cup-entregado">0.00</p>
-            </div>
+        <h2>Resumen Operativo (Hoy)</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+            <div class="card"><h4>Cant.</h4><p id="m-cantidad">0</p></div>
+            <div class="card"><h4>USD Total</h4><p id="m-usd-recibido">$0.00</p></div>
+            <div class="card"><h4>Ganancia</h4><p id="m-comisiones" style="color:var(--success)">$0.00</p></div>
+            <div class="card"><h4>CUP Total</h4><p id="m-cup-entregado">0 CUP</p></div>
         </div>
     </div>
 </div>
 
-<!-- MODAL COMISIONES -->
+<!-- Modal Comisiones -->
 <div id="modal-comisiones" class="modal">
-    <div class="modal-content" style="max-width: 700px;">
+    <div class="modal-content" style="max-width: 600px;">
         <span class="close" onclick="cerrarModal('modal-comisiones')">&times;</span>
-        <h2 style="margin-top:0">Configuración de Tramos</h2>
+        <h2>Configuración de Comisiones</h2>
         <div class="table-container">
-            <table id="tabla-comisiones">
-                <thead>
-                    <tr>
-                        <th>Mínimo (USD)</th>
-                        <th>Máximo (USD)</th>
-                        <th>Comisión (USD)</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
+            <table>
+                <thead><tr><th>Min</th><th>Max</th><th>Comisión</th><th>Acción</th></tr></thead>
                 <tbody id="cuerpo-comisiones"></tbody>
             </table>
         </div>
-        <br>
-        <button class="btn-primary" onclick="agregarFilaComision()" style="width:100%; background: #0f172a;">
-            + Agregar Nuevo Tramo de Comisión
-        </button>
+        <button class="btn-primary" style="width:100%; margin-top:15px;" onclick="agregarFilaComision()">+ Nuevo Tramo</button>
     </div>
 </div>
 
-<!-- MODAL CONCILIACIÓN -->
+<!-- Modal Conciliación -->
 <div id="modal-conciliacion" class="modal">
-    <div class="modal-content" style="max-width: 900px;">
+    <div class="modal-content">
         <span class="close" onclick="cerrarModal('modal-conciliacion')">&times;</span>
-        <h2 style="margin-top:0">Conciliación Diaria</h2>
-        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border);">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end;">
-                <div>
-                    <label style="font-size: 0.8rem; color: var(--text-muted);">Total Confirmado (Sistema)</label>
-                    <input type="number" id="conc-confirmado" readonly style="width:100%; background: #eee; padding: 8px; border: 1px solid var(--border); border-radius: 4px;">
-                </div>
-                <div>
-                    <label style="font-size: 0.8rem; color: var(--text-muted);">Total Real en Banco (USD)</label>
-                    <input type="number" id="conc-banco" step="0.01" style="width:100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;">
-                </div>
-                <div>
-                    <label style="font-size: 0.8rem; color: var(--text-muted);">Observaciones</label>
-                    <input type="text" id="conc-obs" placeholder="Ej: Faltó un depósito" style="width:100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;">
-                </div>
-                <button class="btn-primary" onclick="guardarConciliacion()">Cerrar Día</button>
-            </div>
+        <h2>Conciliación Diaria</h2>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <input type="number" id="conc-confirmado" readonly placeholder="Sistema">
+            <input type="number" id="conc-banco" placeholder="Monto en Banco">
+            <input type="text" id="conc-obs" placeholder="Notas...">
+            <button class="btn-primary" onclick="guardarConciliacion()">Cerrar Día</button>
         </div>
         <div class="table-container">
             <table id="tabla-conciliacion">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Sistema (USD)</th>
-                        <th>Banco (USD)</th>
-                        <th>Diferencia</th>
-                        <th>Obs.</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Fecha</th><th>Sistema</th><th>Banco</th><th>Dif.</th><th>Obs.</th></tr></thead>
                 <tbody id="cuerpo-conciliacion"></tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!-- MODAL LOGS -->
+<!-- Modal Logs -->
 <div id="modal-logs" class="modal">
     <div class="modal-content">
         <span class="close" onclick="cerrarModal('modal-logs')">&times;</span>
-        <h2 style="margin-top:0">Auditoría de Operaciones</h2>
-        <div class="table-container">
-            <table id="tabla-logs">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>ID Transacción</th>
-                        <th>Acción</th>
-                        <th>Admin</th>
-                        <th>Comentario</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpo-logs"></tbody>
-            </table>
-        </div>
+        <h2>Historial de Auditoría</h2>
+        <div class="table-container"><table id="tabla-logs">
+            <thead><tr><th>Fecha</th><th>TX</th><th>Acción</th><th>Admin</th><th>Comentario</th></tr></thead>
+            <tbody id="cuerpo-logs"></tbody>
+        </table></div>
     </div>
 </div>
 
