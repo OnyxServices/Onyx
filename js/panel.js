@@ -264,7 +264,7 @@ async function cargarLogs() {
 
 // --- REAL-TIME ---
 // --- CONFIGURACIÓN DE NOTIFICACIÓN (SÓLO SCRIPT) ---
-const sonidoNotificacion = new Audio("https://onyxservices.github.io/fastcuba/sound/notification.wav");
+const sonidoNotificacion = new Audio("https://onyxservices.github.io/Onyx/sound/notification.wav");
 sonidoNotificacion.preload = "auto";
 
 
@@ -439,7 +439,7 @@ async function cargarTransacciones() {
 
         // --- WHATSAPP REMITENTE (MENSAJE PERSONALIZADO) ---
         const numRemitente = tx.remitente_whatsapp ? tx.remitente_whatsapp.replace(/\D/g, '') : '';
-        const msgRemitente = encodeURIComponent(`Hola ${tx.remitente_nombre}, su transferencia de ${tx.monto_usd} USD ya fue confirmada con éxito. Gracias por confiar en FastCuba.`);
+        const msgRemitente = encodeURIComponent(`Hola ${tx.remitente_nombre}, su transferencia de ${tx.monto_usd} USD ya fue confirmada con éxito. Gracias por confiar en Onyx.`);
         const linkRemitente = numRemitente ? `https://wa.me/${numRemitente}?text=${msgRemitente}` : '#';
 
         // --- WHATSAPP BENEFICIARIO ---

@@ -85,7 +85,7 @@ async function inicializar() {
         // Guardar datos globales
         const config = configResult.data ?? {};
         tasaCambio = config.tasa_cambio ?? 0;
-        cuentaZelle = config.zelle_cuenta ?? 'pago@fastcuba.com';
+        cuentaZelle = config.zelle_cuenta ?? 'pago@Onyx.com';
         tramosComision = comisionesResult.data ?? [];
 
         // Actualizar DOM
